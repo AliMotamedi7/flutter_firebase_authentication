@@ -25,12 +25,14 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '17' # Java 17 is recommended for newer Android Gradle Plugins
+          cache: 'gradle'
 
       # 3. Set up the Flutter environment
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
+          cache: 'true'
 
       # 4. Fetch the project dependencies
       - name: Install dependencies
