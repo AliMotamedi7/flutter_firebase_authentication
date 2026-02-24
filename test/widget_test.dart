@@ -1,30 +1,30 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
+import 'package:flutter_firebase_authentication/features/auth/presentation/view/auth_page.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:flutter_firebase_authentication/main.dart';
+// IMPORTANT: Import the file where your login screen widget lives
+// import 'package:your_app_name/login_screen.dart'; 
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('Sign in with Google button renders on the screen', (WidgetTester tester) async {
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    // 1. Build our app and trigger a frame.
+    // We wrap your screen in a MaterialApp (or GetMaterialApp since you use GetX) 
+    // so it has the proper visual context to render text and buttons.
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: AuthPage(),
+      ),
+    );
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    // 2. Wait for all animations and rendering to finish
+    await tester.pumpAndSettle();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // 3. Search the screen for the exact text on your button
+    // (Make sure this string exactly matches the text in your app!)
+    final googleButtonFinder = find.text('Sign in with Google');
+
+    // 4. Assert that the tester found exactly one widget with this text
+    expect(googleButtonFinder, findsOneWidget);
   });
 }
