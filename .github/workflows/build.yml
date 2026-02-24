@@ -40,7 +40,7 @@ jobs:
       - name: Create firebase_options.dart
         env:
           FIREBASE_OPTIONS: ${{ secrets.FIREBASE_OPTIONS_CONTENT }}
-          run: echo "$FIREBASE_OPTIONS" > lib/firebase_options.dart
+        run: echo "$FIREBASE_OPTIONS" > lib/firebase_options.dart
 
       # 5. Run your automated tests
       - name: Run tests
