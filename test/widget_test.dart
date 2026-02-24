@@ -1,6 +1,8 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_firebase_authentication/features/auth/presentation/controller/auth_controller.dart';
 import 'package:flutter_firebase_authentication/features/auth/presentation/view/auth_page.dart';
+import 'package:flutter_firebase_authentication/firebase_options.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 
@@ -13,6 +15,8 @@ void main() {
     // 1. Build our app and trigger a frame.
     // We wrap your screen in a MaterialApp (or GetMaterialApp since you use GetX) 
     // so it has the proper visual context to render text and buttons.
+    WidgetsFlutterBinding.ensureInitialized();
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
     Get.put(AuthController());
     await tester.pumpWidget(
       const MaterialApp(
