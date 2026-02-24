@@ -1,8 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_firebase_authentication/core/constants/constants.dart';
 import 'package:flutter_firebase_authentication/core/router/routes.dart';
 import 'package:flutter_firebase_authentication/core/status/base_status.dart';
-import 'package:flutter_firebase_authentication/core/utils/deep_link_handler.dart';
 import 'package:get/get.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -15,7 +15,8 @@ class AuthController extends GetxController with StateMixin {
   @override
   void onInit() {
     super.onInit();
-    DeepLinkHandler.instance.initDeepLinks();
+    passwordController.addListener(validatePasswords);
+    confirmPasswordController.addListener(validatePasswords);
   }
 
   @override
@@ -28,6 +29,7 @@ class AuthController extends GetxController with StateMixin {
 
   /// -------------------Variables---------------------
   final RxBool showHidePassword = RxBool(false);
+  final RxBool isPasswordMatching = RxBool(false);
 
   /// -------------------Controllers------------------
   final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
@@ -44,6 +46,11 @@ class AuthController extends GetxController with StateMixin {
   /// -------------------Functions--------------------
   void togglePassword() {
     showHidePassword.value = !showHidePassword.value;
+  }
+
+  void validatePasswords() {
+    isPasswordMatching.value =
+        passwordController.text.isNotEmpty && passwordController.text == confirmPasswordController.text;
   }
 
   void goToRegister() {
@@ -142,9 +149,7 @@ class AuthController extends GetxController with StateMixin {
 
   Future<void> signInWithGoogle() async {
     try {
-      await GoogleSignIn.instance.initialize(
-        serverClientId: '452666345373-l67q98suos58t96d1fh9l8jhss66mett.apps.googleusercontent.com',
-      );
+      await GoogleSignIn.instance.initialize(serverClientId: Constants.googleServerClientId);
 
       final GoogleSignInAccount googleUser = await GoogleSignIn.instance.authenticate();
 
@@ -157,7 +162,6 @@ class AuthController extends GetxController with StateMixin {
       await FirebaseAuth.instance.signInWithCredential(credential);
 
       Get.offAndToNamed(Routes.home);
-
     } on GoogleSignInException catch (e) {
       if (kDebugMode) {
         print("Google Sign In Error: ${e.code}, $e");
@@ -169,14 +173,10 @@ class AuthController extends GetxController with StateMixin {
     }
   }
 
-  Future<UserCredential?> signUpWithGoogle() async {
+  Future<void> signUpWithGoogle() async {
     try {
-      // 1. Initialize GoogleSignIn with your Web Client ID
-      await GoogleSignIn.instance.initialize(
-        serverClientId: '452666345373-l67q98suos58t96d1fh9l8jhss66mett.apps.googleusercontent.com',
-      );
+      await GoogleSignIn.instance.initialize(serverClientId: Constants.googleServerClientId);
 
-      // 2. Trigger the Google authentication flow
       final GoogleSignInAccount googleUser = await GoogleSignIn.instance.authenticate();
 
       final GoogleSignInAuthentication googleAuth = googleUser.authentication;
@@ -185,23 +185,17 @@ class AuthController extends GetxController with StateMixin {
         idToken: googleAuth.idToken,
       );
 
-      // 5. Pass the credential to Firebase (This creates the account if it doesn't exist)
-      final UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+      await FirebaseAuth.instance.signInWithCredential(credential);
 
-      if (userCredential.additionalUserInfo?.isNewUser == true) {
-        print("🎉 Success! A brand new account was created for: ${userCredential.user?.email}");
-      } else {
-        print("👋 Welcome back! Logged in as: ${userCredential.user?.email}");
-      }
-
-      return userCredential;
-
+      Get.offAndToNamed(Routes.home);
     } on GoogleSignInException catch (e) {
-      print("Google Sign In Error: ${e.code}, $e");
-      return null;
+      if (kDebugMode) {
+        print("Google Sign In Error: ${e.code}, $e");
+      }
     } catch (e) {
-      print("Unexpected error during Google Sign-Up: $e");
-      return null;
+      if (kDebugMode) {
+        print("Unexpected error during Google Sign-Up: $e");
+      }
     }
   }
 
@@ -209,13 +203,9 @@ class AuthController extends GetxController with StateMixin {
     try {
       GithubAuthProvider githubProvider = GithubAuthProvider();
 
-      final UserCredential userCredential = await FirebaseAuth.instance.signInWithProvider(githubProvider);
+      await FirebaseAuth.instance.signInWithProvider(githubProvider);
 
       Get.offAndToNamed(Routes.home);
-
-      if (kDebugMode) {
-        print("Successfully signed in as: ${userCredential.user?.displayName}");
-      }
     } on FirebaseAuthException catch (e) {
       if (kDebugMode) {
         print("Firebase Auth Error: ${e.code} - ${e.message}");

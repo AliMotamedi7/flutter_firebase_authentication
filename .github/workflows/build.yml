@@ -1,0 +1,52 @@
+name: Test and Build APK
+
+# This workflow triggers on pushes and pull requests to the main branch
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Check out the code from your repository
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Set up Java (Required for Android builds)
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17' # Java 17 is recommended for newer Android Gradle Plugins
+
+      # 3. Set up the Flutter environment
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      # 4. Fetch the project dependencies
+      - name: Install dependencies
+        run: flutter pub get
+
+      # 5. Run your automated tests
+      - name: Run tests
+        run: flutter test
+
+      # 6. Build the APK (Injecting your secret Client ID)
+      - name: Build APK
+        run: flutter build apk --release --dart-define=GOOGLE_SERVER_CLIENT_ID=${{ secrets.GOOGLE_SERVER_CLIENT_ID }}
+
+      # 7. Upload the built APK so you can download it from GitHub
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk

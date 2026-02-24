@@ -79,7 +79,7 @@ class RegisterPage extends GetView<AuthController> {
 
   Widget _confirmPassword() {
     return TextField(
-      obscureText: true,
+      controller: controller.confirmPasswordController,
       onTapOutside: (event) => FocusManager.instance.primaryFocus?.unfocus(),
       decoration: InputDecoration(
         hintText: 'Confirm password',
@@ -94,26 +94,26 @@ class RegisterPage extends GetView<AuthController> {
     return SizedBox(
       height: 56,
       width: MediaQuery.sizeOf(context).width,
-      child: ElevatedButton(
-        onPressed: controller.createAccount,
-        style: ElevatedButton.styleFrom(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadiusGeometry.circular(8)),
-          shadowColor: Colors.transparent,
-          backgroundColor: Colors.black,
-          alignment: Alignment.center,
-          elevation: 0,
-        ),
-        child: Obx(
-          () {
-            if (controller.createAccountStatus.value is BaseLoading) {
-              return CircularProgressIndicator.adaptive(backgroundColor: Colors.white);
-            } else {
-              return Text(
-                'Register',
-                style: GoogleFonts.urbanist(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold),
-              );
-            }
-          },
+      child: Obx(
+        () => ElevatedButton(
+          onPressed: controller.isPasswordMatching.value ? controller.createAccount : null,
+          style: ElevatedButton.styleFrom(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadiusGeometry.circular(8)),
+            shadowColor: Colors.transparent,
+            backgroundColor: controller.isPasswordMatching.value ? Colors.black : Colors.grey,
+            alignment: Alignment.center,
+            elevation: 0,
+          ),
+          child: controller.createAccountStatus.value is BaseLoading
+              ? CircularProgressIndicator.adaptive(backgroundColor: Colors.white)
+              : Text(
+                  'Register',
+                  style: GoogleFonts.urbanist(
+                    color: Colors.white,
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
         ),
       ),
     );
@@ -124,7 +124,7 @@ class RegisterPage extends GetView<AuthController> {
       height: 56,
       width: MediaQuery.sizeOf(context).width,
       child: ElevatedButton(
-        onPressed: () {},
+        onPressed: controller.signUpWithGoogle,
         style: ElevatedButton.styleFrom(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadiusGeometry.circular(8),
